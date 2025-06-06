@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "lifx": {
+      "command": "node",
+      "args": ["C:/path/to/mcp-lifx/build/index.js"],
+      "env": {}
+    }
+  }
+}

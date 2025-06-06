@@ -1,0 +1,35 @@
+{
+  "name": "mcp-lifx",
+  "version": "1.0.0",
+  "description": "MCP server for LIFX API",
+  "main": "build/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc && node build/index.js",
+    "test": "node test-server.js",
+    "clean": "rm -rf build",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "files": ["build"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenvolk/mcp-lifx.git"
+  },
+  "keywords": ["mcp", "lifx", "smart-lights", "model-context-protocol", "api", "home-automation"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lenvolk/mcp-lifx/issues"
+  },
+  "homepage": "https://github.com/lenvolk/mcp-lifx#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.25.55"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "typescript": "^5.8.3"
+  }
+}
