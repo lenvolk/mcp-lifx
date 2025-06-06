@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "c:\\Temp\\GIT\\mcp-lifx\\logs\\.619203b973148d88adfcd9679a78041e54605f4d-audit.json",
+    "files": [
+        {
+            "date": 1749230456114,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-06.log",
+            "hash": "ca764a25d667f7cb37b89575d3349a3e57520ffebe631c7ec0ec12c93bcc44cc"
+        }
+    ],
+    "hashType": "sha256"
+}
