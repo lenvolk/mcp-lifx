@@ -1,21 +1,66 @@
 # mcp-lifx
 
-# For the prompt below use Agent mode GPT4.1
+# Ref Video [link](https://www.youtube.com/watch?v=yUaz89m1M5w&t=1s)
+---
 
-# Step 1 Scraping API Docs with GPT-4 in Agent Mode
+## Get API Token
 
-https://api.developer.lifx.com/reference/introduction
+- Visit: [LIFX Authentication Guide](https://api.developer.lifx.com/reference/authentication)
+- Click on **Account Settings** to generate your API token.
 
-Prompt: Take a look at the web page for this URL and make a markdown table that contains all of the API endpoints as well as the link to get to that specific API endpoint page
+---
 
-# Step 2 Building an API Knowledge Base in VS Code
+## To Test
 
-Prompt: Excellent. Can you now please iterate over each one of these pages and create a file called LIFX dot MD which contains a list of all of the API endpoints, how you call those endpoints, the path to those endpoints, the HTTP methods for those endpoints, and any parameters and whether or not they're required
+- Test your token at: [List Lights Endpoint](https://api.developer.lifx.com/reference/list-lights)
+    - Paste your token into the **Header**
+    - For selector, type: `all`
+    - Output should include: `label:Lenlight`
 
-# Step 3 Understanding MCP and Setting Up the Server
+### Set State Example
 
-https://modelcontextprotocol.io/quickstart/server  copy the page to mcp.md
+- Endpoint: [Set State](https://api.developer.lifx.com/reference/set-state)
+    - Selector: `label:Lenlight`
+    - Color: `red`
 
-# Step 4 Using Claude to Auto-Build the MCP Server
+```json
+{
+  "selector": "label:Lenlight",
+  "color": "red"
+}
+```
 
-Prompt: Lets build an mcp server for the lifx api #file:LIFX.md #file:mcp.md use node
+---
+
+## For the prompt below use Agent mode GPT-4.1
+
+---
+
+### Step 1: Scraping API Docs with GPT-4 in Agent Mode
+
+- [LIFX API Introduction](https://api.developer.lifx.com/reference/introduction)
+
+**Prompt:**
+> Take a look at the web page for this URL and make a markdown table that contains all of the API endpoints as well as the link to get to that specific API endpoint page
+
+---
+
+### Step 2: Building an API Knowledge Base in VS Code
+
+**Prompt:**
+> Excellent. Can you now please iterate over each one of these pages and create a file called `LIFX.md` which contains a list of all of the API endpoints, how you call those endpoints, the path to those endpoints, the HTTP methods for those endpoints, and any parameters and whether or not they're required
+
+---
+
+### Step 3: Understanding MCP and Setting Up the Server
+
+- [MCP Server Quickstart](https://modelcontextprotocol.io/quickstart/server)
+    - Copy the page to `mcp.md`
+
+---
+
+### Step 4: Using Claude to Auto-Build the MCP Server
+
+**Prompt:**
+> Let's build an mcp server for the lifx api  
+> #file:LIFX.md #file:mcp.md use node
