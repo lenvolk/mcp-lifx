@@ -64,3 +64,9 @@
 **Prompt:**
 > Let's build an mcp server for the lifx api  
 > #file:LIFX.md #file:mcp.md use node
+
+### Step 5: Add MCP server
+
+ - create .vscode\mcp.json
+ - click on `add server`
+ - choose `Command (stdio) Run a local command that implements the MCP protocol
