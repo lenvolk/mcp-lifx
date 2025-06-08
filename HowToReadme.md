@@ -15,17 +15,17 @@
 - Test your token at: [List Lights Endpoint](https://api.developer.lifx.com/reference/list-lights)
     - Paste your token into the **Header**
     - For selector, type: `all`
-    - Output should include: `label:Lenlight`
+    - Output should include: `label:Len Light`
 
 ### Set State Example
 
 - Endpoint: [Set State](https://api.developer.lifx.com/reference/set-state)
-    - Selector: `label:Lenlight`
+    - Selector: `label:Len Light`
     - Color: `red`
 
 ```json
 {
-  "selector": "label:Lenlight",
+  "selector": "label:Len Light",
   "color": "red"
 }
 ```
