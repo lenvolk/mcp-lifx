@@ -75,7 +75,7 @@
  - command to run `node`
  - name `lifxmcp`
 
-### Step 5: Signal when task is completed by changing color of the Len Light
+### Step 6: Signal when task is completed by changing color of the Len Light
 
 - update settings.json with 
 ```json
