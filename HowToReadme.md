@@ -80,7 +80,7 @@
 - update settings.json with 
 ```json
     {
-      "text": "Always change the color of my lightbulb when you are finished with a task."
+      "text": "Always change the state of my lightbulb, turn it off and back on, when you are finished with a task."
     },
 ```    
 
