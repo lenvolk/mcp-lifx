@@ -71,7 +71,7 @@
 
  - create .vscode\mcp.json
  - click on `add server`
- - choose `Command (stdio) Run a local command that implements the MCP protocol
+ - choose `Command (stdio) Run a local command that implements the MCP protocol`
  - command to run `node`
  - name `lifxmcp`
 
