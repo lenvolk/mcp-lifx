@@ -65,6 +65,8 @@
 > Let's build an mcp server for the lifx api  
 > #file:LIFX.md #file:mcp.md use node
 
+---
+
 ### Step 5: Add MCP server
 
  - create .vscode\mcp.json
@@ -72,3 +74,15 @@
  - choose `Command (stdio) Run a local command that implements the MCP protocol
  - command to run `node`
  - name `lifxmcp`
+
+### Step 5: Signal when task is completed by changing color of the Len Light
+
+- update settings.json with 
+```json
+    {
+      "text": "Always change the color of my lightbulb when you are finished with a task."
+    },
+```    
+
+**Prompt:**
+> think for a 5 seconds about something and then tell me when you are done
