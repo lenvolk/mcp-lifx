@@ -86,3 +86,9 @@
 
 **Prompt:**
 > think for a 5 seconds about something and then tell me when you are done
+
+## Data Protection
+
+*   **API Token Security:** Your LIFX API token grants control over your lights. **Keep it confidential.** Using the config file (`~/.lifx-api-mcp-server.jsonc` with appropriate file permissions) or environment variables is safer than passing the token as a command-line argument, especially in shared environments or logs.
+*   **Data Flow:** When using a remote LLM (like via Claude Desktop), your prompts *to* the LLM and the *results* returned by this MCP server (light names, states, scene names) will be sent to the LLM provider. Be mindful of potentially sensitive information in your light/group/location/scene labels if privacy is a major concern.
+*   **Local Execution:** This server runs locally on your machine. It communicates directly with the LIFX cloud API over HTTPS.
