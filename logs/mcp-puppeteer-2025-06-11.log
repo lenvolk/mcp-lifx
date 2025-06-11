@@ -3,3 +3,6 @@
 {"level":"info","message":"Puppeteer MCP Server closing","service":"mcp-puppeteer","timestamp":"2025-06-11 11:24:19.539"}
 {"level":"info","message":"Starting MCP server","service":"mcp-puppeteer","timestamp":"2025-06-11 11:25:12.484"}
 {"level":"info","message":"MCP server started successfully","service":"mcp-puppeteer","timestamp":"2025-06-11 11:25:12.489"}
+{"level":"info","message":"Puppeteer MCP Server closing","service":"mcp-puppeteer","timestamp":"2025-06-11 12:03:11.246"}
+{"level":"info","message":"Starting MCP server","service":"mcp-puppeteer","timestamp":"2025-06-11 12:44:25.983"}
+{"level":"info","message":"MCP server started successfully","service":"mcp-puppeteer","timestamp":"2025-06-11 12:44:25.987"}
