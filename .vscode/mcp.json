@@ -17,6 +17,9 @@
             "env": {
                 "LIFX_API_TOKEN": "${input:lifx_token_new}"
             }
+        },
+        "Jokesterv1": {
+            "url": "https://volkjokes-bjckg0acg9fed3fa.canadacentral-01.azurewebsites.net/mcp"
         }
     }
 }

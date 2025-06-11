@@ -9,6 +9,11 @@
             "date": 1749230456114,
             "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-06.log",
             "hash": "ca764a25d667f7cb37b89575d3349a3e57520ffebe631c7ec0ec12c93bcc44cc"
+        },
+        {
+            "date": 1749655006551,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-11.log",
+            "hash": "6c86c1ea011bbad7dc94c36104b29e5b17074c883b333f35da7c78ca18600f35"
         }
     ],
     "hashType": "sha256"
