@@ -6,14 +6,39 @@
     "auditLog": "c:\\Temp\\GIT\\mcp-lifx\\logs\\.619203b973148d88adfcd9679a78041e54605f4d-audit.json",
     "files": [
         {
-            "date": 1749230456114,
-            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-06.log",
-            "hash": "ca764a25d667f7cb37b89575d3349a3e57520ffebe631c7ec0ec12c93bcc44cc"
+            "date": 1750789678192,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-24.log",
+            "hash": "deb7c34e6412532eecc51fa59058a3dd092a2cece6bd7d110efbf657d54e3008"
         },
         {
-            "date": 1749655006551,
-            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-11.log",
-            "hash": "6c86c1ea011bbad7dc94c36104b29e5b17074c883b333f35da7c78ca18600f35"
+            "date": 1751080681437,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-27.log",
+            "hash": "8709d45e595e929e8fa1b0733d6b765a85b4e921b9bc1b5421d8a5e1f08e9488"
+        },
+        {
+            "date": 1751321526851,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-06-30.log",
+            "hash": "da0bf0349a8b6537e2fc1da6945d1a0d771f666155b12a72bd1ac29466bb33fc"
+        },
+        {
+            "date": 1751378392814,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-07-01.log",
+            "hash": "afd78fd10edcaf27f2ccad03d821eb0328ad93af6f6ebb697c12659c83a21a73"
+        },
+        {
+            "date": 1751466748210,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-07-02.log",
+            "hash": "6720e018606cc3664a77099bc5872bbe97d5e94f2682c0c4cecc2d6ca8898216"
+        },
+        {
+            "date": 1751767613352,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-07-05.log",
+            "hash": "681cc7e7376600516a498953654b4fae9c7c4d59469f31fb48d169145d7c0584"
+        },
+        {
+            "date": 1751919352407,
+            "name": "c:\\Temp\\GIT\\mcp-lifx\\logs\\mcp-puppeteer-2025-07-07.log",
+            "hash": "00d9bab42cc72feeb2130c7afdf210b6bf5b16b32afd8e53114716e965ad830b"
         }
     ],
     "hashType": "sha256"
