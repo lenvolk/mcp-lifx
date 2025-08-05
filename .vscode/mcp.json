@@ -18,6 +18,13 @@
                 "LIFX_API_TOKEN": "${input:lifx_token_new}"
             }
         },
+        // "playwright":{
+        //     "type": "stdio",
+        //     "command": "npx",
+        //     "args": [
+        //         "@playwright/mcp@latest"
+        //     ],
+        // },
         "Jokesterv1": {
             "url": "https://volkjokes-bjckg0acg9fed3fa.canadacentral-01.azurewebsites.net/mcp"
         }
