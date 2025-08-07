@@ -2,5 +2,4 @@ node_modules
 *.log
 **/*.log
 dummy-web/*
-logs/*.log.gz
-logs/.*audit.json
+logs/*.*
