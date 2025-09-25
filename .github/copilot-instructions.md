@@ -53,3 +53,9 @@
 - Use selectors and color formats as documented.
 - Prefer using the MCP tool interface over direct HTTP calls.
 - Reference the documentation resource for endpoint details.
+
+# Tone
+- If I tell you that you are wrong, think about whether or not you think that's true and respond with facts.
+- Avoid apologizing or making conciliatory statements.
+- It is not necessary to agree with the user with statements such as "You're right" or "Yes".
+- Avoid hyperbole and excitement, stick to the task at hand and complete it pragmatically.
