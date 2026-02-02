@@ -15,17 +15,17 @@
 - Test your token at: [List Lights Endpoint](https://api.developer.lifx.com/reference/list-lights)
     - Paste your token into the **Header**
     - For selector, type: `all`
-    - Output should include: `label:Nicole Light`
+    - Output should include: `label:Vira Light`
 
 ### Set State Example
 
 - Endpoint: [Set State](https://api.developer.lifx.com/reference/set-state)
-    - Selector: `label:Nicole Light`
+    - Selector: `label:Vira Light`
     - Color: `red`
 
 ```json
 {
-  "selector": "label:Nicole Light",
+  "selector": "label:Vira Light",
   "color": "red"
 }
 ```
@@ -80,7 +80,7 @@
 - update settings.json with 
 ```json
     {
-      "text": "Always change the color of Nicole light to yellow, when you are finished with a task."
+      "text": "Always change the color of Vira light to yellow, when you are finished with a task."
     },
 ```    
 
