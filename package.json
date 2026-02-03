@@ -5,19 +5,31 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:app && npm run build:server",
+    "build:app": "vite build",
+    "build:server": "tsc",
     "start": "node build/index.js",
-    "dev": "tsc && node build/index.js",
+    "serve": "tsx src/index.ts",
+    "dev": "npm run build && npm start",
     "test": "node test-server.js",
     "clean": "rm -rf build",
     "rebuild": "npm run clean && npm run build"
   },
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lenvolk/mcp-lifx.git"
   },
-  "keywords": ["mcp", "lifx", "smart-lights", "model-context-protocol", "api", "home-automation"],
+  "keywords": [
+    "mcp",
+    "lifx",
+    "smart-lights",
+    "model-context-protocol",
+    "api",
+    "home-automation"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -25,11 +37,20 @@
   },
   "homepage": "https://github.com/lenvolk/mcp-lifx#readme",
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.0.1",
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "zod": "^3.25.55"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
-    "typescript": "^5.8.3"
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.3.1",
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }

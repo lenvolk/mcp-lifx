@@ -7,6 +7,9 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 // LIFX API configuration
 const LIFX_API_BASE = "https://api.lifx.com/v1";
@@ -144,6 +147,18 @@ const server = new Server(
   }
 );
 
+// Load MCP App HTML
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+let lifxAppHtml: string | null = null;
+
+try {
+  lifxAppHtml = readFileSync(join(__dirname, "mcp-app.html"), "utf-8");
+} catch (error) {
+  console.error("Warning: Could not load mcp-app.html. MCP App UI will not be available.");
+  console.error("Build the app with: npm run build:app");
+}
+
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -269,6 +284,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      // MCP App tool - only included if HTML is built
+      ...(lifxAppHtml
+        ? [
+            {
+              name: "lifx_control",
+              description: "Interactive UI for controlling LIFX smart lights with real-time controls for power, color, brightness, and effects.",
+              inputSchema: {
+                type: "object",
+                properties: {},
+                required: [],
+              },
+              _meta: {
+                ui: {
+                  resourceUri: "lifx://app/control",
+                },
+              },
+            },
+          ]
+        : []),
     ],
   };
 });
@@ -494,6 +528,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
+      case "lifx_control": {
+        // This tool launches the interactive UI
+        return {
+          content: [
+            {
+              type: "text",
+              text: "🎨 Launching LIFX Control interactive UI...",
+            },
+          ],
+        };
+      }
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -520,6 +566,17 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
         name: "LIFX API Documentation",
         description: "Complete LIFX API endpoint documentation",
       },
+      // MCP App resource - only included if HTML is built
+      ...(lifxAppHtml
+        ? [
+            {
+              uri: "lifx://app/control",
+              mimeType: "text/html",
+              name: "LIFX Control App",
+              description: "Interactive UI for controlling LIFX lights",
+            },
+          ]
+        : []),
     ],
   };
 });
@@ -572,6 +629,22 @@ Use selectors to target specific lights:
           uri,
           mimeType: "text/markdown",
           text: docs,
+        },
+      ],
+    };
+  }
+
+  if (uri === "lifx://app/control") {
+    if (!lifxAppHtml) {
+      throw new Error("MCP App HTML not available. Build the app with: npm run build:app");
+    }
+
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "text/html",
+          text: lifxAppHtml,
         },
       ],
     };

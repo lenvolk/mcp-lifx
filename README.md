@@ -16,11 +16,22 @@ This MCP server exposes the following LIFX API functionality as tools:
 - ✅ **validate_color** - Validate color string formats
 - ⏹️ **effects_off** - Turn off any running effects
 
+### 🎨 Interactive MCP App
+
+NEW! This server includes an interactive web-based UI that provides:
+- Visual controls for all your LIFX lights
+- Real-time power, color, and brightness adjustments
+- One-click color presets
+- Visual effects (breathe & pulse) controls
+- Theme-aware design that adapts to your client
+
+See [MCP_APP_GUIDE.md](MCP_APP_GUIDE.md) for details on using the interactive UI.
+
 ## Prerequisites
 
 1. **LIFX API Token**: Get your token from [LIFX Cloud Settings](https://cloud.lifx.com/settings)
 2. **Node.js**: Version 16 or higher
-3. **MCP Client**: Such as Claude Desktop or any MCP-compatible client
+3. **VS Code** with **GitHub Copilot** extension
 
 ## Installation
 
@@ -42,43 +53,52 @@ npm run build
 
 ## Usage
 
-### With Claude Desktop
+### With VS Code and GitHub Copilot
 
-Add this server to your Claude Desktop configuration file:
+The LIFX MCP server works seamlessly with VS Code's GitHub Copilot:
 
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+1. Ensure the server is built: `npm run build`
+2. Set your `LIFX_API_TOKEN` environment variable
+3. The server will be automatically discovered by VS Code's MCP integration
+4. Open GitHub Copilot Chat and interact with your lights
 
-```json
-{
-  "mcpServers": {
-    "lifx": {
-      "command": "node",
-      "args": ["C:/path/to/mcp-lifx/build/index.js"],
-      "env": {}
-    }
-  }
-}
-```
+Example interactions:
+- "List all my LIFX lights"
+- "Open LIFX control" (launches the interactive UI)
+- "Turn on the kitchen lights"
+- "Set living room lights to blue"
 
-### Direct Usage
+### Running the Server
 
-You can also run the server directly:
+You can run the server directly with:
 
 ```bash
 npm start
+```
+
+Or in development mode:
+
+```bash
+npm run serve
 ```
 
 ## Example Usage
 
 Once connected to an MCP client, you can use commands like:
 
+### Text Commands
 - "List all my LIFX lights"
 - "Turn on the kitchen lights"
 - "Set living room lights to blue"
 - "Start a breathe effect on all lights with red color"
 - "Show me all my saved scenes"
 - "Activate the movie night scene"
+
+### Interactive UI
+- "Open LIFX control" - Launches the interactive web UI with visual controls
+- "Show LIFX app" - Alternative way to open the interactive UI
+
+The interactive UI provides visual controls for power, brightness, colors, and effects without needing text commands. See [MCP_APP_GUIDE.md](./MCP_APP_GUIDE.md) for details.
 
 ## LIFX Selectors
 
@@ -106,20 +126,32 @@ The server supports various color formats:
 ```
 mcp-lifx/
 ├── src/
-│   └── index.ts      # Main MCP server implementation
-├── build/            # Compiled JavaScript output
-├── LIFX.md          # LIFX API documentation
-├── mcp.md           # MCP tutorial reference
-├── package.json     # Project configuration
-├── tsconfig.json    # TypeScript configuration
-└── README.md        # This file
+│   ├── index.ts          # Main MCP server implementation
+│   ├── mcp-app.tsx       # React MCP app UI
+│   └── mcp-app.html      # HTML entry point for app
+├── build/
+│   ├── index.js          # Compiled server
+│   └── src/
+│       └── mcp-app.html  # Bundled single-file app UI
+├── LIFX.md               # LIFX API documentation
+├── MCP_APP_GUIDE.md      # Interactive UI usage guide
+├── mcp.md                # MCP tutorial reference
+├── vite.config.ts        # Vite build configuration
+├── package.json          # Project configuration
+├── tsconfig.json         # TypeScript configuration
+└── README.md             # This file
 ```
 
 ### Available Scripts
 
-- `npm run build` - Compile TypeScript to JavaScript
+- `npm run build` - Build both the MCP app UI and server
+- `npm run build:app` - Build only the React UI
+- `npm run build:server` - Build only the TypeScript server
 - `npm start` - Run the compiled server
+- `npm run serve` - Run server in development mode (with tsx)
 - `npm run dev` - Build and run in one command
+- `npm run clean` - Remove build directory
+- `npm run rebuild` - Clean and rebuild everything
 
 ### API Reference
 
