@@ -7,7 +7,7 @@
                 "${workspaceFolder}/build/index.js"
             ],
             "envFile": "${workspaceFolder}/.env"
-        },
+        }
         // "playwright":{
         //     "type": "stdio",
         //     "command": "npx",
@@ -15,8 +15,8 @@
         //         "@playwright/mcp@latest"
         //     ],
         // },
-        "Jokesterv1": {
-            "url": "https://volkjokes-bjckg0acg9fed3fa.canadacentral-01.azurewebsites.net/mcp"
-        }
+        // "Jokesterv1": {
+        //     "url": "https://volkjokes-bjckg0acg9fed3fa.canadacentral-01.azurewebsites.net/mcp"
+        // }
     }
 }

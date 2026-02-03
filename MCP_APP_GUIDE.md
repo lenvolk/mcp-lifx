@@ -2,7 +2,9 @@
 
 ## Overview
 
-The LIFX MCP App provides an interactive, web-based UI for controlling your LIFX smart lights directly within MCP-enabled clients like VS Code with GitHub Copilot. It offers a visual alternative to text-based commands.
+The LIFX MCP App provides an interactive, web-based UI for controlling your LIFX smart lights directly within MCP-enabled clients that support MCP Apps.
+
+> **Note:** MCP Apps require a host that supports the MCP Apps extension (`ext-apps`). VS Code with GitHub Copilot may have limited support for MCP Apps UI rendering. Use text-based commands as an alternative, or test with the `basic-host` example from the ext-apps SDK.
 
 ## Features
 
@@ -117,6 +119,11 @@ npm run serve  # Uses tsx to run TypeScript directly
 - Verify the build completed: `ls build/src/mcp-app.html`
 - Check server logs for "mcp-app.html not found" warnings
 - Rebuild: `npm run rebuild`
+- **Important:** VS Code/Copilot may not fully support MCP Apps UI yet. Use text-based tools instead, or test with basic-host (see Testing below)
+
+**Wrong file opens instead of MCP App:**
+- Ensure there are no HTML files in the workspace with similar names (e.g., `lifx-control.html`)
+- The MCP App uses the `lifx://app/control` resource URI, not a local file
 
 **Lights not loading:**
 - Verify `LIFX_API_TOKEN` is set
@@ -127,6 +134,24 @@ npm run serve  # Uses tsx to run TypeScript directly
 - Check if the host supports MCP Apps
 - Verify CSS variables are being applied
 - Check browser console for errors
+
+## Testing with basic-host
+
+Since VS Code/Copilot may have limited MCP Apps support, test with the official basic-host:
+
+```bash
+# Clone the ext-apps SDK
+git clone --branch "v$(npm view @modelcontextprotocol/ext-apps version)" --depth 1 https://github.com/modelcontextprotocol/ext-apps.git /tmp/mcp-ext-apps
+
+# Terminal 1: Build and run your server
+npm run build && npm run serve
+
+# Terminal 2: Run basic-host
+cd /tmp/mcp-ext-apps/examples/basic-host
+npm install
+SERVERS='["stdio:node c:\\Temp\\GIT\\mcp-lifx\\build\\index.js"]' npm run start
+# Open http://localhost:8080
+```
 
 ## Future Enhancements
 

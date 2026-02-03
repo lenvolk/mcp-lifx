@@ -7,7 +7,7 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -152,12 +152,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 let lifxAppHtml: string | null = null;
 
-try {
-  lifxAppHtml = readFileSync(join(__dirname, "mcp-app.html"), "utf-8");
-} catch (error) {
-  console.error("Warning: Could not load mcp-app.html. MCP App UI will not be available.");
+// HTML is built to build/src/mcp-app.html, server runs from build/index.js
+const htmlPath = join(__dirname, "src", "mcp-app.html");
+if (existsSync(htmlPath)) {
+  try {
+    lifxAppHtml = readFileSync(htmlPath, "utf-8");
+    console.error("MCP App HTML loaded successfully from:", htmlPath);
+  } catch (error) {
+    console.error("Warning: Could not load mcp-app.html. MCP App UI will not be available.");
+    console.error("Build the app with: npm run build:app");
+  }
+} else {
+  console.error("Warning: mcp-app.html not found at", htmlPath);
   console.error("Build the app with: npm run build:app");
 }
+
+// MCP App resource URI
+const MCP_APP_RESOURCE_URI = "lifx://app/control";
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -170,6 +181,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: "object",
           properties: {
             selector: { type: "string", description: "Selector for filtering lights (default: 'all'). Examples: 'all', 'label:Kitchen', 'group:Living Room', 'id:d073d5000000'" },
+            format: { type: "string", enum: ["text", "json"], description: "Output format (default: 'text'). Use 'json' for structured data." },
           },
           required: [],
         },
@@ -297,7 +309,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               },
               _meta: {
                 ui: {
-                  resourceUri: "lifx://app/control",
+                  resourceUri: MCP_APP_RESOURCE_URI,
+                  visibility: ["model", "app"],
                 },
               },
             },
@@ -316,9 +329,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     switch (name) {
       case "list_lights": {
-        const { selector = "all" } = args as { selector?: string };
+        const { selector = "all", format = "text" } = args as { selector?: string; format?: string };
         const lights = await makeLIFXRequest(`/lights/${selector}`, { token });
         
+        // Return JSON format for UI consumption
+        if (format === "json") {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(lights),
+              },
+            ],
+          };
+        }
+        
+        // Default text format for chat
         return {
           content: [
             {
@@ -529,12 +555,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "lifx_control": {
-        // This tool launches the interactive UI
+        // This tool launches the interactive UI - the host will render the resource
         return {
           content: [
             {
               type: "text",
-              text: "🎨 Launching LIFX Control interactive UI...",
+              text: "Launching LIFX Control interactive UI...",
             },
           ],
         };
@@ -570,7 +596,7 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
       ...(lifxAppHtml
         ? [
             {
-              uri: "lifx://app/control",
+              uri: MCP_APP_RESOURCE_URI,
               mimeType: "text/html",
               name: "LIFX Control App",
               description: "Interactive UI for controlling LIFX lights",
@@ -601,6 +627,7 @@ This server provides access to the LIFX HTTP API through MCP tools.
 7. **activate_scene** - Activate a specific scene
 8. **validate_color** - Validate color string format
 9. **effects_off** - Turn off any running effects
+10. **lifx_control** - Interactive UI for controlling lights (MCP App)
 
 ## Authentication
 
@@ -621,6 +648,10 @@ Use selectors to target specific lights:
 - RGB: \`rgb:255,0,0\`
 - HSB: \`hue:120 saturation:1.0 brightness:0.5\`
 - Kelvin: \`kelvin:3500\`
+
+## MCP App UI
+
+The \`lifx_control\` tool provides an interactive UI for controlling lights in hosts that support MCP Apps.
 `;
 
     return {
@@ -634,7 +665,7 @@ Use selectors to target specific lights:
     };
   }
 
-  if (uri === "lifx://app/control") {
+  if (uri === MCP_APP_RESOURCE_URI) {
     if (!lifxAppHtml) {
       throw new Error("MCP App HTML not available. Build the app with: npm run build:app");
     }

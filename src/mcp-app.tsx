@@ -76,39 +76,56 @@ const LIFXApp: React.FC<AppProps> = () => {
       setLoading(true);
       setError(null);
       
-      // Call the MCP tool to get lights
+      // Call the MCP tool to get lights in JSON format
       const result = await app.callServerTool({
         name: "list_lights",
-        arguments: { selector: "all" },
+        arguments: { selector: "all", format: "json" },
       });
 
-      // Parse the result - the actual implementation would need to handle the text format
-      // For now, we'll use mock data since the server returns formatted text
-      // In production, you'd modify the server to return JSON for the UI
-      console.log("Lights result:", result);
-      
-      // For now, show a placeholder until we get real data
-      // In a real implementation, you'd parse the result or modify the server
-      setLights([]);
+      // Parse the JSON response
+      if (result.content?.[0]?.type === "text") {
+        const lightsData = JSON.parse(result.content[0].text) as Light[];
+        setLights(lightsData);
+      }
       
     } catch (err) {
+      console.error("Failed to load lights:", err);
       setError(err instanceof Error ? err.message : "Failed to load lights");
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePower = async (selector: string) => {
+  const togglePower = async (lightId: string) => {
     if (!app) return;
+    
+    // Extract the actual ID without the selector prefix
+    const actualId = lightId.startsWith('id:') ? lightId.slice(3) : lightId;
+    
+    // Find the current light state
+    const currentLight = lights.find(l => l.id === actualId);
+    const newPowerState = currentLight?.power === "on" ? "off" : "on";
+    
+    console.log(`Toggling ${actualId} from ${currentLight?.power} to ${newPowerState}`);
+    
+    // Optimistically update local state immediately
+    setLights(prev => prev.map(light => 
+      light.id === actualId 
+        ? { ...light, power: newPowerState }
+        : light
+    ));
     
     try {
       await app.callServerTool({
-        name: "toggle_power",
-        arguments: { selector, duration: 1 },
+        name: "set_state",
+        arguments: { selector: lightId, power: newPowerState, duration: 0.5 },
       });
-      await loadLights();
+      // Refresh after a delay to sync with actual state
+      setTimeout(() => loadLights(), 2000);
     } catch (err) {
       console.error("Failed to toggle power:", err);
+      // Revert on error by reloading
+      loadLights();
     }
   };
 
@@ -118,21 +135,27 @@ const LIFXApp: React.FC<AppProps> = () => {
     try {
       await app.callServerTool({
         name: "set_state",
-        arguments: { selector, color, duration: 1 },
+        arguments: { selector, color, duration: 0.5 },
       });
-      await loadLights();
     } catch (err) {
       console.error("Failed to set color:", err);
     }
   };
 
-  const setBrightness = async (selector: string, brightness: number) => {
+  const setBrightness = async (lightId: string, brightness: number) => {
     if (!app) return;
+    
+    // Update local state immediately for responsive UI
+    setLights(prev => prev.map(light => 
+      light.id === lightId.replace('id:', '') 
+        ? { ...light, brightness }
+        : light
+    ));
     
     try {
       await app.callServerTool({
         name: "set_state",
-        arguments: { selector, brightness, duration: 0.5 },
+        arguments: { selector: lightId, brightness, duration: 0.3 },
       });
     } catch (err) {
       console.error("Failed to set brightness:", err);
@@ -210,7 +233,7 @@ const LIFXApp: React.FC<AppProps> = () => {
     );
   }
 
-  // Demo UI showing the interface structure
+  // Render actual lights dynamically
   return (
     <div style={{
       padding: "24px",
@@ -249,238 +272,219 @@ const LIFXApp: React.FC<AppProps> = () => {
         </button>
       </div>
 
-      <div style={{
-        display: "grid",
-        gap: "16px",
-        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-      }}>
-        {/* Demo card showing the UI structure */}
+      {lights.length === 0 && !loading ? (
         <div style={{
-          padding: "20px",
+          padding: "24px",
           backgroundColor: "var(--color-background-secondary)",
-          borderRadius: "var(--border-radius-lg)",
-          border: "1px solid var(--color-border-secondary)",
-        }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}>
-            <div>
-              <h3 style={{
-                margin: 0,
-                fontSize: "var(--font-heading-md-size)",
-                fontWeight: "var(--font-weight-medium)",
-              }}>
-                Vira Light
-              </h3>
-              <p style={{
-                margin: "4px 0 0 0",
-                fontSize: "var(--font-text-sm-size)",
-                color: "var(--color-text-secondary)",
-              }}>
-                Master Bedroom • MBedroomGrp
-              </p>
-            </div>
-            <button
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "50%",
-                border: "none",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                fontSize: "24px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onClick={() => togglePower("label:Vira Light")}
-            >
-              💡
-            </button>
-          </div>
-
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              fontSize: "var(--font-text-sm-size)",
-              color: "var(--color-text-secondary)",
-            }}>
-              Brightness
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="100"
-              onChange={(e) => setBrightness("label:Vira Light", parseInt(e.target.value) / 100)}
-              style={{ width: "100%" }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              fontSize: "var(--font-text-sm-size)",
-              color: "var(--color-text-secondary)",
-            }}>
-              Quick Colors
-            </label>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              {["white", "red", "blue", "green", "yellow", "purple"].map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setColor("label:Vira Light", color)}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "var(--border-radius-sm)",
-                    border: "2px solid var(--color-border-primary)",
-                    backgroundColor: color,
-                    cursor: "pointer",
-                  }}
-                  title={color.charAt(0).toUpperCase() + color.slice(1)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              fontSize: "var(--font-text-sm-size)",
-              color: "var(--color-text-secondary)",
-            }}>
-              Effects
-            </label>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={() => startEffect("label:Vira Light", "breathe", "blue")}
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  backgroundColor: "var(--color-background-tertiary)",
-                  color: "var(--color-text-primary)",
-                  border: "1px solid var(--color-border-primary)",
-                  borderRadius: "var(--border-radius-sm)",
-                  cursor: "pointer",
-                  fontSize: "var(--font-text-sm-size)",
-                }}
-              >
-                🌊 Breathe
-              </button>
-              <button
-                onClick={() => startEffect("label:Vira Light", "pulse", "red")}
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  backgroundColor: "var(--color-background-tertiary)",
-                  color: "var(--color-text-primary)",
-                  border: "1px solid var(--color-border-primary)",
-                  borderRadius: "var(--border-radius-sm)",
-                  cursor: "pointer",
-                  fontSize: "var(--font-text-sm-size)",
-                }}
-              >
-                ⚡ Pulse
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Second demo card */}
-        <div style={{
-          padding: "20px",
-          backgroundColor: "var(--color-background-secondary)",
-          borderRadius: "var(--border-radius-lg)",
-          border: "1px solid var(--color-border-secondary)",
-          opacity: 0.6,
-        }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}>
-            <div>
-              <h3 style={{
-                margin: 0,
-                fontSize: "var(--font-heading-md-size)",
-                fontWeight: "var(--font-weight-medium)",
-              }}>
-                Nicole Light
-              </h3>
-              <p style={{
-                margin: "4px 0 0 0",
-                fontSize: "var(--font-text-sm-size)",
-                color: "var(--color-text-secondary)",
-              }}>
-                Master Bedroom • MBedroomGrp
-              </p>
-            </div>
-            <button
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "50%",
-                border: "2px solid var(--color-border-primary)",
-                backgroundColor: "transparent",
-                fontSize: "24px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onClick={() => togglePower("label:Nicole Light")}
-            >
-              💡
-            </button>
-          </div>
-
-          <div style={{
-            padding: "16px",
-            backgroundColor: "var(--color-background-tertiary)",
-            borderRadius: "var(--border-radius-md)",
-            textAlign: "center",
-            color: "var(--color-text-secondary)",
-            fontSize: "var(--font-text-sm-size)",
-          }}>
-            Light is off
-          </div>
-        </div>
-      </div>
-
-      <div style={{
-        marginTop: "24px",
-        padding: "16px",
-        backgroundColor: "var(--color-background-secondary)",
-        borderRadius: "var(--border-radius-md)",
-        border: "1px solid var(--color-border-secondary)",
-      }}>
-        <h3 style={{
-          margin: "0 0 12px 0",
-          fontSize: "var(--font-heading-sm-size)",
-          fontWeight: "var(--font-weight-medium)",
-        }}>
-          💡 About This Demo
-        </h3>
-        <p style={{
-          margin: 0,
-          fontSize: "var(--font-text-sm-size)",
+          borderRadius: "var(--border-radius-md)",
+          textAlign: "center",
           color: "var(--color-text-secondary)",
-          lineHeight: 1.6,
         }}>
-          This is an MCP App interface for your LIFX lights. The UI automatically adapts to the host's theme 
-          and provides an interactive way to control your lights without using the chat interface. 
-          Click the refresh button to load your actual lights!
-        </p>
-      </div>
+          No lights found. Make sure your LIFX lights are connected and the API token is valid.
+        </div>
+      ) : (
+        <div style={{
+          display: "grid",
+          gap: "16px",
+          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+        }}>
+          {lights.map((light) => (
+            <div
+              key={light.id}
+              style={{
+                padding: "20px",
+                backgroundColor: "var(--color-background-secondary)",
+                borderRadius: "var(--border-radius-lg)",
+                border: "1px solid var(--color-border-secondary)",
+                opacity: light.connected ? 1 : 0.6,
+              }}
+            >
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}>
+                <div>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: "var(--font-heading-md-size)",
+                    fontWeight: "var(--font-weight-medium)",
+                  }}>
+                    {light.label}
+                  </h3>
+                  <p style={{
+                    margin: "4px 0 0 0",
+                    fontSize: "var(--font-text-sm-size)",
+                    color: "var(--color-text-secondary)",
+                  }}>
+                    {light.location.name} • {light.group.name}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  style={{
+                    width: "56px",
+                    height: "56px",
+                    borderRadius: "50%",
+                    border: light.power === "on" ? "none" : "2px dashed var(--color-border-primary)",
+                    backgroundColor: light.power === "on" ? "#4CAF50" : "#333",
+                    color: "white",
+                    fontSize: "28px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: light.power === "on" ? "0 0 12px rgba(76, 175, 80, 0.5)" : "none",
+                    transition: "all 0.2s ease",
+                    position: "relative",
+                    zIndex: 10,
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    togglePower(`id:${light.id}`);
+                  }}
+                  title={light.power === "on" ? "Click to turn off" : "Click to turn on"}
+                >
+                  💡
+                </button>
+              </div>
+
+              {light.power === "on" ? (
+                <>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "var(--font-text-sm-size)",
+                      color: "var(--color-text-secondary)",
+                    }}>
+                      Brightness: {Math.round(light.brightness * 100)}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={Math.round(light.brightness * 100)}
+                      onChange={(e) => setBrightness(`id:${light.id}`, parseInt(e.target.value) / 100)}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "var(--font-text-sm-size)",
+                      color: "var(--color-text-secondary)",
+                    }}>
+                      Quick Colors
+                    </label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {["white", "red", "blue", "green", "yellow", "purple"].map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setColor(`id:${light.id}`, color)}
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "var(--border-radius-sm)",
+                            border: "2px solid var(--color-border-primary)",
+                            backgroundColor: color,
+                            cursor: "pointer",
+                          }}
+                          title={color.charAt(0).toUpperCase() + color.slice(1)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "var(--font-text-sm-size)",
+                      color: "var(--color-text-secondary)",
+                    }}>
+                      Effects
+                    </label>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        onClick={() => startEffect(`id:${light.id}`, "breathe", "blue")}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-sm)",
+                          cursor: "pointer",
+                          fontSize: "var(--font-text-sm-size)",
+                        }}
+                      >
+                        🌊 Breathe
+                      </button>
+                      <button
+                        onClick={() => startEffect(`id:${light.id}`, "pulse", "red")}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-sm)",
+                          cursor: "pointer",
+                          fontSize: "var(--font-text-sm-size)",
+                        }}
+                      >
+                        ⚡ Pulse
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{
+                  padding: "16px",
+                  backgroundColor: "var(--color-background-tertiary)",
+                  borderRadius: "var(--border-radius-md)",
+                  textAlign: "center",
+                }}>
+                  <p style={{
+                    margin: "0 0 12px 0",
+                    color: "var(--color-text-secondary)",
+                    fontSize: "var(--font-text-sm-size)",
+                  }}>
+                    {light.connected ? "Light is off" : "Light is disconnected"}
+                  </p>
+                  {light.connected && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        togglePower(`id:${light.id}`);
+                      }}
+                      style={{
+                        padding: "10px 24px",
+                        backgroundColor: "#4CAF50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "var(--border-radius-sm)",
+                        cursor: "pointer",
+                        fontSize: "var(--font-text-sm-size)",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ⚡ Turn On
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
