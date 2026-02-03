@@ -162,22 +162,94 @@ const LIFXApp: React.FC<AppProps> = () => {
     }
   };
 
-  const startEffect = async (selector: string, effect: "breathe" | "pulse", color: string) => {
+  const startEffect = async (selector: string, effect: "breathe" | "pulse" | "sunrise" | "relax" | "energize", color?: string) => {
     if (!app) return;
     
     try {
-      await app.callServerTool({
-        name: effect === "breathe" ? "breathe_effect" : "pulse_effect",
-        arguments: {
-          selector,
-          color,
-          period: 2,
-          cycles: 5,
-          power_on: true,
-        },
-      });
+      if (effect === "breathe") {
+        await app.callServerTool({
+          name: "breathe_effect",
+          arguments: {
+            selector,
+            color: color || "blue",
+            period: 2,
+            cycles: 5,
+            power_on: true,
+          },
+        });
+      } else if (effect === "pulse") {
+        await app.callServerTool({
+          name: "pulse_effect",
+          arguments: {
+            selector,
+            color: color || "red",
+            period: 0.5,
+            cycles: 10,
+            power_on: true,
+          },
+        });
+      } else if (effect === "sunrise") {
+        // Gradually warm up - simulate sunrise
+        await app.callServerTool({
+          name: "set_state",
+          arguments: {
+            selector,
+            power: "on",
+            color: "kelvin:2500",
+            brightness: 0.3,
+            duration: 2,
+          },
+        });
+        setTimeout(async () => {
+          await app.callServerTool({
+            name: "set_state",
+            arguments: {
+              selector,
+              color: "kelvin:4000",
+              brightness: 1.0,
+              duration: 5,
+            },
+          });
+        }, 2000);
+      } else if (effect === "relax") {
+        await app.callServerTool({
+          name: "set_state",
+          arguments: {
+            selector,
+            power: "on",
+            color: "kelvin:2700",
+            brightness: 0.5,
+            duration: 2,
+          },
+        });
+      } else if (effect === "energize") {
+        await app.callServerTool({
+          name: "set_state",
+          arguments: {
+            selector,
+            power: "on",
+            color: "kelvin:5500",
+            brightness: 1.0,
+            duration: 1,
+          },
+        });
+      }
+      // Refresh after effect
+      setTimeout(() => loadLights(), 3000);
     } catch (err) {
       console.error("Failed to start effect:", err);
+    }
+  };
+
+  const stopEffects = async (selector: string) => {
+    if (!app) return;
+    try {
+      await app.callServerTool({
+        name: "effects_off",
+        arguments: { selector },
+      });
+    } catch (err) {
+      console.error("Failed to stop effects:", err);
     }
   };
 
@@ -403,42 +475,128 @@ const LIFXApp: React.FC<AppProps> = () => {
                   <div>
                     <label style={{
                       display: "block",
-                      marginBottom: "8px",
+                      marginBottom: "12px",
                       fontSize: "var(--font-text-sm-size)",
                       color: "var(--color-text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
                     }}>
-                      Effects
+                      Run Effect:
                     </label>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
                       <button
-                        onClick={() => startEffect(`id:${light.id}`, "breathe", "blue")}
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); startEffect(`id:${light.id}`, "breathe"); }}
                         style={{
-                          flex: 1,
-                          padding: "8px 12px",
+                          padding: "16px 8px",
                           backgroundColor: "var(--color-background-tertiary)",
                           color: "var(--color-text-primary)",
                           border: "1px solid var(--color-border-primary)",
-                          borderRadius: "var(--border-radius-sm)",
+                          borderRadius: "var(--border-radius-md)",
                           cursor: "pointer",
-                          fontSize: "var(--font-text-sm-size)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
                         }}
                       >
-                        🌊 Breathe
+                        <span style={{ fontSize: "24px" }}>🌬️</span>
+                        <span style={{ fontSize: "12px" }}>breathe</span>
                       </button>
                       <button
-                        onClick={() => startEffect(`id:${light.id}`, "pulse", "red")}
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); startEffect(`id:${light.id}`, "pulse"); }}
                         style={{
-                          flex: 1,
-                          padding: "8px 12px",
+                          padding: "16px 8px",
                           backgroundColor: "var(--color-background-tertiary)",
                           color: "var(--color-text-primary)",
                           border: "1px solid var(--color-border-primary)",
-                          borderRadius: "var(--border-radius-sm)",
+                          borderRadius: "var(--border-radius-md)",
                           cursor: "pointer",
-                          fontSize: "var(--font-text-sm-size)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
                         }}
                       >
-                        ⚡ Pulse
+                        <span style={{ fontSize: "24px" }}>💗</span>
+                        <span style={{ fontSize: "12px" }}>pulse</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); startEffect(`id:${light.id}`, "sunrise"); }}
+                        style={{
+                          padding: "16px 8px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-md)",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>🌅</span>
+                        <span style={{ fontSize: "12px" }}>sunrise</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); startEffect(`id:${light.id}`, "relax"); }}
+                        style={{
+                          padding: "16px 8px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-md)",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>😌</span>
+                        <span style={{ fontSize: "12px" }}>relax</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); startEffect(`id:${light.id}`, "energize"); }}
+                        style={{
+                          padding: "16px 8px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-md)",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>⚡</span>
+                        <span style={{ fontSize: "12px" }}>energize</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); stopEffects(`id:${light.id}`); }}
+                        style={{
+                          padding: "16px 8px",
+                          backgroundColor: "var(--color-background-tertiary)",
+                          color: "var(--color-text-primary)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "var(--border-radius-md)",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>⏹️</span>
+                        <span style={{ fontSize: "12px" }}>stop</span>
                       </button>
                     </div>
                   </div>
@@ -483,6 +641,145 @@ const LIFXApp: React.FC<AppProps> = () => {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Global Effects Section - All Lights */}
+      {lights.length > 0 && (
+        <div style={{
+          marginTop: "24px",
+          padding: "20px",
+          backgroundColor: "var(--color-background-secondary)",
+          borderRadius: "var(--border-radius-lg)",
+          border: "1px solid var(--color-border-secondary)",
+        }}>
+          <label style={{
+            display: "block",
+            marginBottom: "16px",
+            fontSize: "var(--font-heading-sm-size)",
+            fontWeight: "var(--font-weight-medium)",
+            color: "var(--color-text-primary)",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+          }}>
+            🌟 All Lights - Run Effect:
+          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "12px" }}>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); startEffect("all", "breathe"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "var(--color-background-tertiary)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border-primary)",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>🌬️</span>
+              <span style={{ fontSize: "14px" }}>breathe</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); startEffect("all", "pulse"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "var(--color-background-tertiary)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border-primary)",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>💗</span>
+              <span style={{ fontSize: "14px" }}>pulse</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); startEffect("all", "sunrise"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "var(--color-background-tertiary)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border-primary)",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>🌅</span>
+              <span style={{ fontSize: "14px" }}>sunrise</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); startEffect("all", "relax"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "var(--color-background-tertiary)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border-primary)",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>😌</span>
+              <span style={{ fontSize: "14px" }}>relax</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); startEffect("all", "energize"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "var(--color-background-tertiary)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border-primary)",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>⚡</span>
+              <span style={{ fontSize: "14px" }}>energize</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); stopEffects("all"); }}
+              style={{
+                padding: "20px 12px",
+                backgroundColor: "#ff5252",
+                color: "white",
+                border: "none",
+                borderRadius: "var(--border-radius-md)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "32px" }}>⏹️</span>
+              <span style={{ fontSize: "14px" }}>stop all</span>
+            </button>
+          </div>
         </div>
       )}
     </div>
