@@ -12,6 +12,16 @@ import { z } from "zod";
 const LIFX_API_BASE = "https://api.lifx.com/v1";
 const USER_AGENT = "mcp-lifx-server/1.0";
 
+// Get token from environment
+function getLifxToken(): string {
+  const token = process.env.LIFX_API_TOKEN;
+  if (!token) {
+    throw new Error("LIFX_API_TOKEN environment variable is not set. Get your token at https://cloud.lifx.com/settings");
+  }
+  return token;
+}
+
+
 // Types for LIFX API
 interface LIFXLight {
   id: string;
@@ -119,7 +129,6 @@ const ColorSchema = z.string().describe("Color string (e.g., 'blue', 'rgb:255,0,
 const PowerSchema = z.enum(["on", "off"]).describe("Power state");
 const BrightnessSchema = z.number().min(0).max(1).describe("Brightness level (0.0 to 1.0)");
 const DurationSchema = z.number().min(0).describe("Duration in seconds");
-const TokenSchema = z.string().describe("LIFX API token");
 
 // Create server instance
 const server = new Server(
@@ -141,54 +150,50 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "list_lights",
-        description: "Get lights belonging to the authenticated account",
+        description: "Get lights belonging to the authenticated account. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
-            selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
+            selector: { type: "string", description: "Selector for filtering lights (default: 'all'). Examples: 'all', 'label:Kitchen', 'group:Living Room', 'id:d073d5000000'" },
           },
-          required: ["token"],
+          required: [],
         },
       },
       {
         name: "set_state",
-        description: "Set the state of lights",
+        description: "Set the state of lights (power, color, brightness). Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
             selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
             power: { type: "string", enum: ["on", "off"], description: "Power state" },
-            color: { type: "string", description: "Color string" },
+            color: { type: "string", description: "Color string (e.g., 'blue', 'rgb:255,0,0', 'kelvin:3500')" },
             brightness: { type: "number", minimum: 0, maximum: 1, description: "Brightness (0.0 to 1.0)" },
-            duration: { type: "number", minimum: 0, description: "Duration in seconds" },
+            duration: { type: "number", minimum: 0, description: "Transition duration in seconds" },
             infrared: { type: "number", minimum: 0, maximum: 1, description: "Infrared brightness (0.0 to 1.0)" },
             fast: { type: "boolean", description: "Fast mode (skip confirmation)" },
           },
-          required: ["token"],
+          required: [],
         },
       },
       {
         name: "toggle_power",
-        description: "Toggle power state of lights",
+        description: "Toggle power state of lights. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
             selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
-            duration: { type: "number", minimum: 0, description: "Duration in seconds" },
+            duration: { type: "number", minimum: 0, description: "Transition duration in seconds" },
           },
-          required: ["token"],
+          required: [],
         },
       },
       {
         name: "breathe_effect",
-        description: "Perform a breathe effect",
+        description: "Perform a breathe effect (slowly pulse between colors). Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
             selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
             color: { type: "string", description: "Color to breathe" },
             from_color: { type: "string", description: "Starting color" },
@@ -198,16 +203,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             power_on: { type: "boolean", description: "Turn on if off" },
             peak: { type: "number", minimum: 0, maximum: 1, description: "Peak brightness (0.0 to 1.0)" },
           },
-          required: ["token", "color"],
+          required: ["color"],
         },
       },
       {
         name: "pulse_effect",
-        description: "Perform a pulse effect",
+        description: "Perform a pulse effect (flash between colors). Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
             selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
             color: { type: "string", description: "Color to pulse" },
             from_color: { type: "string", description: "Starting color" },
@@ -217,57 +221,52 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             power_on: { type: "boolean", description: "Turn on if off" },
             peak: { type: "number", minimum: 0, maximum: 1, description: "Peak brightness (0.0 to 1.0)" },
           },
-          required: ["token", "color"],
+          required: ["color"],
         },
       },
       {
         name: "list_scenes",
-        description: "List all scenes available in the account",
+        description: "List all scenes available in the account. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
-          properties: {
-            token: { type: "string", description: "LIFX API token" },
-          },
-          required: ["token"],
+          properties: {},
+          required: [],
         },
       },
       {
         name: "activate_scene",
-        description: "Activate a scene",
+        description: "Activate a scene by UUID. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
-            scene_uuid: { type: "string", description: "Scene UUID" },
-            duration: { type: "number", minimum: 0, description: "Duration in seconds" },
+            scene_uuid: { type: "string", description: "Scene UUID (get from list_scenes)" },
+            duration: { type: "number", minimum: 0, description: "Transition duration in seconds" },
             fast: { type: "boolean", description: "Fast mode (skip confirmation)" },
           },
-          required: ["token", "scene_uuid"],
+          required: ["scene_uuid"],
         },
       },
       {
         name: "validate_color",
-        description: "Validate a color string",
+        description: "Validate a color string format. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
-            color: { type: "string", description: "Color string to validate" },
+            color: { type: "string", description: "Color string to validate (e.g., 'blue', 'rgb:255,0,0', 'hue:120')" },
           },
-          required: ["token", "color"],
+          required: ["color"],
         },
       },
       {
         name: "effects_off",
-        description: "Turn off any running effects",
+        description: "Turn off any running effects. Token is read from LIFX_API_TOKEN environment variable.",
         inputSchema: {
           type: "object",
           properties: {
-            token: { type: "string", description: "LIFX API token" },
             selector: { type: "string", description: "Selector for filtering lights (default: 'all')" },
             power_off: { type: "boolean", description: "Also turn off the lights" },
           },
-          required: ["token"],
+          required: [],
         },
       },
     ],
@@ -279,9 +278,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    const token = getLifxToken();
+
     switch (name) {
       case "list_lights": {
-        const { token, selector = "all" } = args as { token: string; selector?: string };
+        const { selector = "all" } = args as { selector?: string };
         const lights = await makeLIFXRequest(`/lights/${selector}`, { token });
         
         return {
@@ -297,8 +298,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "set_state": {
-        const { token, selector = "all", ...stateParams } = args as {
-          token: string;
+        const { selector = "all", ...stateParams } = args as {
           selector?: string;
           power?: string;
           color?: string;
@@ -329,8 +329,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "toggle_power": {
-        const { token, selector = "all", duration } = args as {
-          token: string;
+        const { selector = "all", duration } = args as {
           selector?: string;
           duration?: number;
         };
@@ -353,8 +352,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "breathe_effect": {
-        const { token, selector = "all", ...effectParams } = args as {
-          token: string;
+        const { selector = "all", ...effectParams } = args as {
           selector?: string;
           color: string;
           from_color?: string;
@@ -386,8 +384,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "pulse_effect": {
-        const { token, selector = "all", ...effectParams } = args as {
-          token: string;
+        const { selector = "all", ...effectParams } = args as {
           selector?: string;
           color: string;
           from_color?: string;
@@ -419,7 +416,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "list_scenes": {
-        const { token } = args as { token: string };
         const scenes = await makeLIFXRequest("/scenes", { token });
 
         return {
@@ -435,8 +431,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "activate_scene": {
-        const { token, scene_uuid, duration, fast } = args as {
-          token: string;
+        const { scene_uuid, duration, fast } = args as {
           scene_uuid: string;
           duration?: number;
           fast?: boolean;
@@ -463,7 +458,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "validate_color": {
-        const { token, color } = args as { token: string; color: string };
+        const { color } = args as { color: string };
         const result = await makeLIFXRequest(`/color?color=${encodeURIComponent(color)}`, { token });
 
         return {
@@ -477,8 +472,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "effects_off": {
-        const { token, selector = "all", power_off } = args as {
-          token: string;
+        const { selector = "all", power_off } = args as {
           selector?: string;
           power_off?: boolean;
         };

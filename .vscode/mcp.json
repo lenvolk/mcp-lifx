@@ -1,22 +1,12 @@
 {
-    "inputs": [
-        {
-            "type": "promptString",
-            "id": "lifx_token_new",
-            "description": "Enter your LIFX API token",
-            "password": true
-        }
-    ],
     "servers": {
         "lifxmcp": {
             "type": "stdio",
             "command": "node",
             "args": [
-                "C:\\Temp\\GIT\\mcp-lifx\\build\\index.js"
+                "${workspaceFolder}/build/index.js"
             ],
-            "env": {
-                "LIFX_API_TOKEN": "${input:lifx_token_new}"
-            }
+            "envFile": "${workspaceFolder}/.env"
         },
         // "playwright":{
         //     "type": "stdio",

@@ -3,3 +3,8 @@ node_modules
 **/*.log
 dummy-web/*
 logs/*.*
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
