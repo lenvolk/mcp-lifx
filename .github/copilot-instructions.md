@@ -41,6 +41,10 @@
 - "Set living room lights to blue" → `set_state` tool with selector `group:Living Room`, color `blue`
 - "Activate the movie night scene" → `activate_scene` tool with scene UUID
 
+## Skills
+When asked to create an MCP App, add a UI to an MCP tool, or build interactive MCP views, read `.github/skills/create-mcp-app/SKILL.md` first.
+When asked to create or modify MCP servers, read `.github/skills/mcp-builder/SKILL.md` first.
+
 ## References
 - See `README.md` for setup, usage, and configuration details.
 - See `LIFX.md` for full API endpoint documentation.
