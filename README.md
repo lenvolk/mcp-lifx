@@ -64,9 +64,11 @@ The LIFX MCP server works seamlessly with VS Code's GitHub Copilot:
 
 Example interactions:
 - "List all my LIFX lights"
-- "Open LIFX control" (launches the interactive UI)
+- "Open LIFX control" - launches the interactive UI with visual controls
+- "Show LIFX app" - alternative way to open the control interface
 - "Turn on the kitchen lights"
 - "Set living room lights to blue"
+- "Launch LIFX dashboard" - opens the visual control panel
 
 ### Running the Server
 
@@ -95,8 +97,16 @@ Once connected to an MCP client, you can use commands like:
 - "Activate the movie night scene"
 
 ### Interactive UI
-- "Open LIFX control" - Launches the interactive web UI with visual controls
-- "Show LIFX app" - Alternative way to open the interactive UI
+
+Launch the visual control interface with any of these prompts:
+- "Open LIFX control" - Primary command to launch the UI
+- "Show LIFX app" - Alternative prompt
+- "Launch LIFX interface" - Opens the interactive controls
+- "Open LIFX dashboard" - Displays the visual UI
+- "Show me LIFX controls" - Launches the control panel
+- "Open the LIFX control panel" - Starts the interactive interface
+- "I want to control my LIFX lights visually" - Opens the UI
+- "Show LIFX remote" - Alternative way to access controls
 
 The interactive UI provides visual controls for power, brightness, colors, and effects without needing text commands. See [MCP_APP_GUIDE.md](./MCP_APP_GUIDE.md) for details.
 
